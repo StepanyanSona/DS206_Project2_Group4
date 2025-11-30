@@ -1,0 +1,1 @@
+-- update_dim_shippers.sql placeholder
