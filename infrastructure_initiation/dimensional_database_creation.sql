@@ -1,1 +1,5 @@
--- SQL content placeholder
+IF DB_ID('ORDER_DDS') IS NULL
+BEGIN
+    CREATE DATABASE ORDER_DDS;
+END;
+GO
