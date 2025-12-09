@@ -4,6 +4,7 @@
 USE {database_name};
 GO
 
+
 DECLARE @sor_sk INT;
 SELECT @sor_sk = SOR_SK FROM {schema_name}.Dim_SOR WHERE StagingTableName = '{staging_table_name}';
 
