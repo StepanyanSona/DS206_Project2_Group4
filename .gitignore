@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs (optional - you might want to keep these)
+# logs/*.txt
+
+# Config files with sensitive data (keep the example, ignore the actual)
+# sql_server_config.cfg
+
+# Excel source files (optional - might be large)
+# raw_data_source.xlsx
+
