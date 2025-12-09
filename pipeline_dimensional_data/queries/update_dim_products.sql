@@ -1,1 +1,0 @@
--- update_dim_products.sql placeholder
