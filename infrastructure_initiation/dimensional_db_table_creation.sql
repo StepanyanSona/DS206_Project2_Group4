@@ -2,7 +2,7 @@ USE ORDER_DDS;
 GO
 
 /* =====================
-   Dim_SOR
+   Dim_SOR 
    ===================== */
 IF OBJECT_ID('dbo.Dim_SOR','U') IS NOT NULL DROP TABLE dbo.Dim_SOR;
 CREATE TABLE dbo.Dim_SOR (
@@ -20,6 +20,7 @@ INSERT INTO dbo.Dim_SOR (StagingTableName) VALUES
  ('stg_Products_raw'),
  ('stg_Orders_raw'),
  ('stg_OrderDetails_raw');
+GO
 
 /* =====================
    DimCategories – SCD1
@@ -33,8 +34,10 @@ CREATE TABLE dbo.DimCategories (
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
     CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+    UpdatedAt DATETIME2 NULL,
+    CONSTRAINT FK_DimCategories_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
+GO
 
 /* =====================
    DimCustomers – SCD2
@@ -59,8 +62,10 @@ CREATE TABLE dbo.DimCustomers (
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
     CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+    UpdatedAt DATETIME2 NULL,
+    CONSTRAINT FK_DimCustomers_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
+GO
 
 /* =====================
    DimEmployees – SCD1 + delete
@@ -76,8 +81,10 @@ CREATE TABLE dbo.DimEmployees (
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
     CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+    UpdatedAt DATETIME2 NULL,
+    CONSTRAINT FK_DimEmployees_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
+GO
 
 /* =====================
    DimProducts – SCD2 + delete closing
@@ -102,8 +109,10 @@ CREATE TABLE dbo.DimProducts (
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
     CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+    UpdatedAt DATETIME2 NULL,
+    CONSTRAINT FK_DimProducts_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
+GO
 
 /* =====================
    DimRegion – SCD4
@@ -116,8 +125,10 @@ CREATE TABLE dbo.DimRegion (
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
     CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+    UpdatedAt DATETIME2 NULL,
+    CONSTRAINT FK_DimRegion_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
+GO
 
 IF OBJECT_ID('dbo.DimRegion_Hist','U') IS NOT NULL DROP TABLE dbo.DimRegion_Hist;
 CREATE TABLE dbo.DimRegion_Hist (
@@ -127,6 +138,7 @@ CREATE TABLE dbo.DimRegion_Hist (
     ChangeDate DATE NOT NULL,
     ChangeType NVARCHAR(20) NOT NULL
 );
+GO
 
 /* =====================
    DimShippers – SCD1 + delete
@@ -141,8 +153,10 @@ CREATE TABLE dbo.DimShippers (
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
     CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+    UpdatedAt DATETIME2 NULL,
+    CONSTRAINT FK_DimShippers_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
+GO
 
 /* =====================
    DimSuppliers – SCD3
@@ -166,8 +180,10 @@ CREATE TABLE dbo.DimSuppliers (
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
     CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+    UpdatedAt DATETIME2 NULL,
+    CONSTRAINT FK_DimSuppliers_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
+GO
 
 /* =====================
    DimTerritories – SCD4
@@ -181,8 +197,10 @@ CREATE TABLE dbo.DimTerritories (
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
     CreatedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-    UpdatedAt DATETIME2 NULL
+    UpdatedAt DATETIME2 NULL,
+    CONSTRAINT FK_DimTerritories_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
+GO
 
 IF OBJECT_ID('dbo.DimTerritories_Hist','U') IS NOT NULL DROP TABLE dbo.DimTerritories_Hist;
 CREATE TABLE dbo.DimTerritories_Hist (
@@ -192,9 +210,10 @@ CREATE TABLE dbo.DimTerritories_Hist (
     ChangeDate DATE NOT NULL,
     ChangeType NVARCHAR(20) NOT NULL
 );
+GO
 
 /* =====================
-   FactOrders – INSERT
+   FactOrders – INSERT (created after all dimensions)
    ===================== */
 IF OBJECT_ID('dbo.FactOrders','U') IS NOT NULL DROP TABLE dbo.FactOrders;
 CREATE TABLE dbo.FactOrders (
@@ -217,11 +236,21 @@ CREATE TABLE dbo.FactOrders (
     Discount FLOAT,
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
-    LoadDate DATETIME2 DEFAULT SYSUTCDATETIME()
+    LoadDate DATETIME2 DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_FactOrders_Customer FOREIGN KEY (Customer_SK) REFERENCES dbo.DimCustomers(Customer_SK),
+    CONSTRAINT FK_FactOrders_Employee FOREIGN KEY (Employee_SK) REFERENCES dbo.DimEmployees(Employee_SK),
+    CONSTRAINT FK_FactOrders_Shipper FOREIGN KEY (Shipper_SK) REFERENCES dbo.DimShippers(Shipper_SK),
+    CONSTRAINT FK_FactOrders_Territory FOREIGN KEY (Territory_SK) REFERENCES dbo.DimTerritories(Territory_SK),
+    CONSTRAINT FK_FactOrders_Region FOREIGN KEY (Region_SK) REFERENCES dbo.DimRegion(Region_SK),
+    CONSTRAINT FK_FactOrders_Product FOREIGN KEY (Product_SK) REFERENCES dbo.DimProducts(Product_SK),
+    CONSTRAINT FK_FactOrders_Category FOREIGN KEY (Category_SK) REFERENCES dbo.DimCategories(Category_SK),
+    CONSTRAINT FK_FactOrders_Supplier FOREIGN KEY (Supplier_SK) REFERENCES dbo.DimSuppliers(Supplier_SK),
+    CONSTRAINT FK_FactOrders_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
+GO
 
 /* =====================
-   FactOrders_Error
+   FactOrders_Error (created after all dimensions)
    ===================== */
 IF OBJECT_ID('dbo.FactOrders_Error','U') IS NOT NULL DROP TABLE dbo.FactOrders_Error;
 CREATE TABLE dbo.FactOrders_Error (
@@ -239,6 +268,15 @@ CREATE TABLE dbo.FactOrders_Error (
     Supplier_SK INT NULL,
     SOR_SK INT NOT NULL,
     staging_raw_id_nk INT NOT NULL,
-    LoadDate DATETIME2 DEFAULT SYSUTCDATETIME()
+    LoadDate DATETIME2 DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_FactOrders_Error_Customer FOREIGN KEY (Customer_SK) REFERENCES dbo.DimCustomers(Customer_SK),
+    CONSTRAINT FK_FactOrders_Error_Employee FOREIGN KEY (Employee_SK) REFERENCES dbo.DimEmployees(Employee_SK),
+    CONSTRAINT FK_FactOrders_Error_Shipper FOREIGN KEY (Shipper_SK) REFERENCES dbo.DimShippers(Shipper_SK),
+    CONSTRAINT FK_FactOrders_Error_Territory FOREIGN KEY (Territory_SK) REFERENCES dbo.DimTerritories(Territory_SK),
+    CONSTRAINT FK_FactOrders_Error_Region FOREIGN KEY (Region_SK) REFERENCES dbo.DimRegion(Region_SK),
+    CONSTRAINT FK_FactOrders_Error_Product FOREIGN KEY (Product_SK) REFERENCES dbo.DimProducts(Product_SK),
+    CONSTRAINT FK_FactOrders_Error_Category FOREIGN KEY (Category_SK) REFERENCES dbo.DimCategories(Category_SK),
+    CONSTRAINT FK_FactOrders_Error_Supplier FOREIGN KEY (Supplier_SK) REFERENCES dbo.DimSuppliers(Supplier_SK),
+    CONSTRAINT FK_FactOrders_Error_SOR FOREIGN KEY (SOR_SK) REFERENCES dbo.Dim_SOR(SOR_SK)
 );
 GO
